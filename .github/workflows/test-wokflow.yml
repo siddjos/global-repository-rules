@@ -1,6 +1,7 @@
 name:  Hello
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [new_repository]
 
 jobs:
   hello_world:
