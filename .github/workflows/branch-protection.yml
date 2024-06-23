@@ -1,0 +1,26 @@
+name: set-branch-protection
+
+on:
+    repository_dispatch:
+        types: [repo-created]
+
+jobs:
+    protect-branch:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Set branch protection
+              uses: actions/github-script@v6
+              with:
+                github-token: ${{secrets.ORG_ADMIN_TOKEN}}
+                script: |
+                    await github.rest.repos.updateBranchProtection({
+                        owner: context.payload.organization.login,
+                        repo: context.payload.repository.name,
+                        branch: 'main',
+                        required_status_checks: null,
+                        enforce_admins: true,
+                        required_pull_request_reviews: {
+                          required_approving_review_count: 1
+                        },
+                        restrictions: null
+                      })
