@@ -22,7 +22,7 @@ jobs:
           echo "This is the initial README file created by GitHub Actions." >> README1.md
           git config --global user.email "siddharth.joshi21@gmail.com"
           git config --global user.name "Siddharth Joshi"
-          git add README.md
+          git add README1.md
           git commit -m "Create README1.md"
           git push
         else
