@@ -16,8 +16,3 @@ Method 3
 ============
 
 Using GraphQL APIs
-
-Method 4
-================
-
-Using webhooks
