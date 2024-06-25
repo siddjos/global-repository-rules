@@ -11,6 +11,27 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Clone the remote repository
+      env:
+        GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+      run: |
+        git clone https://github.com/siddjos/notfy6.git        
+
+    - name: Ensure README.md exists in the remote repo
+      run: |
+        cd target_repo
+        if [ ! -f README1.md ]; then
+          echo "# Project Title" > README1.md
+          echo "This is the initial README file created by GitHub Actions." >> README1.md
+          git config --global user.email "siddharth.joshi21@gmail.com"
+          git config --global user.name "Siddharth Joshi"
+          git add README.md
+          git commit -m "Create README1.md"
+          git push
+        else
+          echo "README1.md already exists."
+        fi
+
     - name: Create issue in another repository
       env:
         GH_TOKEN: ${{ secrets.PAT_GITHUB }}
