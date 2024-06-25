@@ -1,6 +1,8 @@
 name: Create Issue in Another Repo
 
 on:
+  repository_dispatch:
+    types: [repo-created]
   workflow_dispatch:
 
 jobs:
@@ -19,26 +21,51 @@ jobs:
         path: notfy6
 
     - name: Ensure README1.md exists in the remote repository
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+        REPO_OWNER: ${{ github.event.client_payload.owner }}
+        REPO_NAME: ${{ github.event.client_payload.repo }}
       run: |
-        cd notfy6
-        if [ ! -f README1.md ]; then
-          echo "# Project Title" > README1.md
-          echo "This is the initial README file created by GitHub Actions." >> README1.md
-          git config --global user.email "siddharth.joshi21@gmail.com"
-          git config --global user.name "Siddharth Joshi"
-          git add README1.md
-          git commit -m "Create README1.md"
-          git push origin main
-        else
-          echo "README1.md already exists."
-        fi
+        # Check if README exists
+          README_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/README.md)
+
+          if [ "$README_CHECK" = "200" ]; then
+            echo "README.md already exists. Skipping creation."
+          else
+            echo "README.md does not exist. Creating now."
+            README_CONTENT="# Welcome to $REPO_NAME\n\nThis README was automatically generated."
+            
+            curl -X PUT \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/README.md \
+              -d '{
+                "message": "Create README",
+                "content": "'"$(echo -n "$README_CONTENT" | base64)"'",
+                "branch": "main"
+              }'
+            
+            if [ $? -eq 0 ]; then
+              echo "README.md created successfully."
+            else
+              echo "Failed to create README.md."
+              exit 1
+            fi
+          fi
 
     - name: Enable branch protection on the main branch
       uses: actions/github-script@v6
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+        REPO_OWNER: ${{ github.event.client_payload.owner }}
+        REPO_NAME: ${{ github.event.client_payload.repo }}
       with:
         github-token: ${{ secrets.PAT_GITHUB }}
         script: |
-          const [owner, repo] = 'siddjos/notfy6'.split('/');
+          const [owner, repo] = '$REPO_OWNER/$REPO_NAME'.split('/');
           const branch = 'main';
           await github.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', {
             owner: owner,
@@ -61,9 +88,11 @@ jobs:
     - name: Create issue in another repository
       env:
         GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+        REPO_OWNER: ${{ github.event.client_payload.owner }}
+        REPO_NAME: ${{ github.event.client_payload.repo }}
       run: |
         curl -X POST \
           -H "Authorization: token $GH_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/siddjos/notfy6/issues \
+          https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues \
           -d '{"title":"New Issue created","body":"This is the body of the new issue created by GitHub Actions."}'
