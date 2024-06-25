@@ -12,10 +12,14 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Clone the remote repository
-      env:
-        GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+      uses: actions/checkout@v2
+      with:
+        repository: siddjos/notfy6
+        token: ${{ secrets.PAT_GITHUB }}
+        path: notfy6
+
+    - name: Ensure README1.md exists in the remote repository
       run: |
-        git clone https://github.com/siddjos/notfy6.git
         cd notfy6
         if [ ! -f README1.md ]; then
           echo "# Project Title" > README1.md
@@ -24,7 +28,7 @@ jobs:
           git config --global user.name "Siddharth Joshi"
           git add README1.md
           git commit -m "Create README1.md"
-          git push
+          git push origin main
         else
           echo "README1.md already exists."
         fi
