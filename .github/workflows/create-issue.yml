@@ -16,7 +16,7 @@ jobs:
         GH_TOKEN: ${{ secrets.PAT_GITHUB }}
       run: |
         git clone https://github.com/siddjos/notfy6.git
-        cd target_repo
+        cd notfy6
         if [ ! -f README1.md ]; then
           echo "# Project Title" > README1.md
           echo "This is the initial README file created by GitHub Actions." >> README1.md
