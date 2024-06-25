@@ -40,7 +40,7 @@ jobs:
         script: |
           const [owner, repo] = 'siddjos/notfy6'.split('/');
           const branch = 'main';
-          github.repos.updateBranchProtection({
+          await github.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', {
             owner: owner,
             repo: repo,
             branch: branch,
