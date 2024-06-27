@@ -128,4 +128,4 @@ jobs:
             main()
         EOF
 
-        python protect_bran
+        python protect_branches.py
